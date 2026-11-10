@@ -6,6 +6,7 @@ import {
   issuePass,
   passRuleErrors,
   type PassInput,
+  signPass,
   type SigningKey,
   type VerifyContext,
   verifyPass,
@@ -233,5 +234,19 @@ describe("verifying a pass at the gate", () => {
       revoked: new Set(["pass-1"]),
     });
     expect(result).toMatchObject({ reason: "wrong_estate" });
+  });
+});
+
+describe("signing a stored pass", () => {
+  it("signs a pass the issuing rules would now refuse, so the gate can still explain it", async () => {
+    const ended = input({
+      validFrom: at(-6 * HOUR),
+      validUntil: at(-2 * HOUR),
+    });
+    await expect(issuePass(ended, signer, NOW)).rejects.toThrow();
+    const token = await signPass(ended, signer, NOW);
+    expect(await verifyPass(token, { ...ctx, now: NOW })).toMatchObject({
+      reason: "expired",
+    });
   });
 });

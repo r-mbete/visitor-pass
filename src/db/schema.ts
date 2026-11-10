@@ -12,6 +12,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { ROLES } from "../lib/access/permissions";
+import { ENTRY_KINDS } from "../lib/gate/types";
 import { REFUSAL_REASONS } from "../lib/pass/token";
 
 const quoted = (values: readonly string[]) =>
@@ -21,7 +22,6 @@ const createdAt = () =>
   timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
 
 export const PASS_STATUSES = ["active", "cancelled"] as const;
-export const ENTRY_KINDS = ["entry", "exit", "refusal"] as const;
 
 export const estate = pgTable("estate", {
   id: uuid("id").primaryKey().defaultRandom(),

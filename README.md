@@ -6,7 +6,7 @@ A resident pre-approves a visitor and the visitor gets a short-lived signed pass
 
 ## Status
 
-Milestones 1 and 2 of 6 are done: the pass rules, permissions, schema and a demo estate are built and tested, with no UI yet. See the milestones in the requirements.
+Milestones 1 to 3 of 6 are done: the pass rules, permissions, schema, a demo estate, and a gate screen that checks passes and records entries. Guard sign-in and offline mode come next. See the milestones in the requirements.
 
 - [Requirements](docs/REQUIREMENTS.md): goals, users, stories, data model, milestones.
 - [Threat model](docs/THREAT-MODEL.md): what is protected, who it is defended against, and the accepted gaps.
@@ -35,7 +35,7 @@ cp .env.example .env.local   # then fill in DATABASE_URL
 npm run keys:generate        # paste the PASS_SIGNING_KEY line into .env.local
 npm run db:migrate
 npm run db:seed              # a demo estate, Mvule Gardens
-npm run dev                  # http://localhost:3000
+npm run dev                  # http://localhost:3000, then open the dashboard
 ```
 
 ## Scripts
@@ -72,16 +72,31 @@ CI runs lint, format check, typecheck, tests and build on every PR and on pushes
 
 A test signs each demo pass and runs it through the real verifier, so this table stays true.
 
+In development the app has four pages, reached from a menu at the top on tablets and desktops and a tab bar at the bottom on phones:
+
+- **Dashboard** (`/dashboard`): today at a glance. Check a visitor, the day's numbers, who is expected, who is inside, and recent activity.
+- **Gate** (`/gate`): the guard's screen. Type a code, see ADMIT or REFUSE with the reason, and record the entry or refusal. The browser checks the pass itself, with the estate's public key, which is how it will work offline.
+- **Passes** (`/passes`): every pass around today, with its QR code, short code and status.
+- **Log** (`/log`): every entry, exit and refusal, newest first.
+
+Until guard sign-in exists, these pages act as the demo estate's guard and are closed in production unless `DEMO_GATE=on` is set.
+
+## Design
+
+The palette and type follow the author's portfolio: Sand and Shell surfaces, Indigo text, Forest for admit, a deep red for refuse, Marigold for "later today", with Newsreader for headings, Inter for text and IBM Plex Mono for labels. Icons are Heroicons: outline in the menu, solid for the current page and for states. Every text colour pair is at least 6.3:1, and a status is always shown in words, never by colour alone. Layouts are built for 390 px phones, tablets and desktops, and are checked at each size with no sideways scrolling.
+
 ## Structure
 
 ```
 docs/               requirements, threat model and ADRs
 drizzle/            generated SQL migrations (never edit by hand)
 src/
-  app/              routes (a placeholder home page for now)
+  app/              pages (/, /dashboard, /gate, /passes, /log) and the gate API (/api/gate/*)
+  components/       shared UI: the menu, page header, pass card, gate log, status labels
   db/               Drizzle schema, client, the demo estate seed and the in-memory test database
   lib/pass/         issuing and verifying signed passes, short codes, keys
   lib/access/       the role and permission rules
+  lib/gate/         the gate check, the device bundle, and recording what a device uploads
   scripts/          one-off scripts, such as generating a signing key
 ```
 

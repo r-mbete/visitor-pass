@@ -1,15 +1,19 @@
 @import "tailwindcss";
 
 @theme {
-  /* The gate screen is read outdoors in sunlight, so text contrast stays well above AA. */
-  --color-paper: #f7f5f0;
-  --color-ink: #14171f;
-  --color-muted: #4a5160;
-  --color-line: #d9d5cc;
-  --color-admit: #0f6b3a;
+  /* The portfolio palette (Sand, Shell, Indigo, Forest, Marigold) given jobs.
+     Contrast (checked): ink on paper 10.8:1, muted on paper 6.3:1, shell on admit 7.1:1, shell on refuse 6.6:1, ink on wait 7.2:1. */
+  --color-paper: #f3dfb1;
+  --color-shell: #f8efde;
+  --color-ink: #282552;
+  --color-muted: #4f4a6e;
+  --color-line: #dcc58e;
+  --color-admit: #37573a;
   --color-refuse: #a3201b;
-  --color-accent: #1f4f8f;
+  --color-wait: #f8a650;
+  --color-accent: #37573a;
 
+  --font-display: var(--font-newsreader), Georgia, serif;
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 }
@@ -20,8 +24,13 @@ body {
   font-family: var(--font-sans);
 }
 
+::selection {
+  background-color: var(--color-wait);
+  color: var(--color-ink);
+}
+
 :focus-visible {
-  outline: 3px solid var(--color-accent);
+  outline: 3px solid var(--color-ink);
   outline-offset: 3px;
 }
 

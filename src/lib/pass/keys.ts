@@ -32,11 +32,16 @@ export function publicPart(jwk: JWK): JWK {
   return { kty, crv, x, y, kid, alg, use };
 }
 
-export async function importSigningKey(privateJwk: JWK): Promise<SigningKey> {
+/** A signing key, with the public half that devices are given. */
+export type ServerSigningKey = SigningKey & { publicJwk: JWK };
+
+export async function importSigningKey(
+  privateJwk: JWK,
+): Promise<ServerSigningKey> {
   if (!privateJwk.kid) throw new Error("Signing key has no kid");
   if (!privateJwk.d) throw new Error("Signing key is not a private key");
   const privateKey = (await importJWK(privateJwk, PASS_ALG)) as CryptoKey;
-  return { kid: privateJwk.kid, privateKey };
+  return { kid: privateJwk.kid, privateKey, publicJwk: publicPart(privateJwk) };
 }
 
 /** Public keys by kid, as the device's verifier wants them. */
@@ -57,7 +62,7 @@ export async function importPublicKeys(
 /** The server's signing key, from PASS_SIGNING_KEY; never call this in client code. */
 export async function loadSigningKey(
   env: Record<string, string | undefined> = process.env,
-): Promise<SigningKey> {
+): Promise<ServerSigningKey> {
   const raw = env.PASS_SIGNING_KEY;
   if (!raw)
     throw new Error(

@@ -92,7 +92,7 @@ export function passRuleErrors(input: PassInput, now: Date): string[] {
   return errors;
 }
 
-/** Signs a pass on the server; throws if the pass breaks a rule. */
+/** Signs a new pass on the server; throws if the pass breaks a rule. */
 export async function issuePass(
   input: PassInput,
   key: SigningKey,
@@ -101,6 +101,15 @@ export async function issuePass(
   const errors = passRuleErrors(input, now);
   if (errors.length > 0)
     throw new Error(`Pass not issued: ${errors.join("; ")}`);
+  return signPass(input, key, now);
+}
+
+/** Signs a pass that was already checked when it was created, e.g. to hand a stored pass to a gate device. */
+export async function signPass(
+  input: PassInput,
+  key: SigningKey,
+  now = new Date(),
+): Promise<string> {
   return new SignJWT({
     est: input.estateId,
     unit: input.unitId,
