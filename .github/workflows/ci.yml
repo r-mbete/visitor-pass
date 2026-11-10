@@ -13,7 +13,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     services:
-      # A throwaway database, so CI checks that the migrations apply cleanly to real Postgres.
+      # A throwaway database, so CI checks that the migrations and the demo seed run on real Postgres.
       postgres:
         image: postgres:17
         env:
@@ -39,4 +39,5 @@ jobs:
       - name: Migrations match the schema
         run: npx drizzle-kit generate && test -z "$(git status --porcelain drizzle)"
       - run: npm run db:migrate
+      - run: npm run db:seed
       - run: npm run build
