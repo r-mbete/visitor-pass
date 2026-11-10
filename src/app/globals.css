@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme {
+  /* The gate screen is read outdoors in sunlight, so text contrast stays well above AA. */
+  --color-paper: #f7f5f0;
+  --color-ink: #14171f;
+  --color-muted: #4a5160;
+  --color-line: #d9d5cc;
+  --color-admit: #0f6b3a;
+  --color-refuse: #a3201b;
+  --color-accent: #1f4f8f;
+
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

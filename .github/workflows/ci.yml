@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      # A throwaway database, so CI checks that the migrations apply cleanly to real Postgres.
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: salama
+          POSTGRES_PASSWORD: salama
+          POSTGRES_DB: salama
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U salama" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://salama:salama@localhost:5432/salama
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm test
+      - name: Migrations match the schema
+        run: npx drizzle-kit generate && test -z "$(git status --porcelain drizzle)"
+      - run: npm run db:migrate
+      - run: npm run build
