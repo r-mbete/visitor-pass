@@ -1,18 +1,12 @@
+import { signedInFor } from "@/lib/auth/session";
 import { getDb } from "@/db/client";
-import { demoGateEnabled, demoGuard } from "@/lib/gate/demo";
 import { parseUpload } from "@/lib/gate/events";
 import { recordGateEvents } from "@/lib/gate/server";
 
-/** Where a gate device uploads what happened. Safe to retry. Demo-only until guard sign-in exists. */
+/** Where a gate device uploads what happened. Safe to retry. Signed-in guards only; recordGateEvents checks the role. */
 export async function POST(request: Request) {
-  if (!demoGateEnabled()) return new Response(null, { status: 404 });
-  const db = getDb();
-  const guard = await demoGuard(db);
-  if (!guard)
-    return Response.json(
-      { error: "No demo guard. Run `npm run db:seed`." },
-      { status: 503 },
-    );
+  const me = await signedInFor(request);
+  if (!me) return Response.json({ error: "sign in first" }, { status: 401 });
 
   let body: unknown;
   try {
@@ -24,6 +18,6 @@ export async function POST(request: Request) {
   if (typeof upload === "string")
     return Response.json({ error: upload }, { status: 400 });
 
-  const result = await recordGateEvents(db, guard, upload.events);
+  const result = await recordGateEvents(getDb(), me, upload.events);
   return Response.json({ ...result, invalid: upload.errors });
 }

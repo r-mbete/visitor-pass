@@ -13,7 +13,7 @@ export async function PassCard({ summary }: { summary: PassSummary }) {
     errorCorrectionLevel: "M",
   });
   return (
-    <article className="border-line bg-shell flex flex-col gap-3 rounded-lg border p-4">
+    <article className="bg-shell shadow-card border-line flex flex-col gap-3 rounded-2xl border p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="truncate text-lg font-semibold">{pass.visitorName}</h3>
@@ -22,13 +22,13 @@ export async function PassCard({ summary }: { summary: PassSummary }) {
         <StatusPill status={status} />
       </div>
       <div
-        className="mx-auto w-full max-w-44 rounded bg-white p-1"
+        className="bg-tile-mint mx-auto w-full max-w-44 rounded-xl p-3 [&_svg]:rounded-md"
         role="img"
         aria-label={`QR code for ${pass.visitorName}'s pass`}
         // Generated on the server from our own signed token.
         dangerouslySetInnerHTML={{ __html: qr }}
       />
-      <p className="text-center font-mono text-2xl tracking-widest">
+      <p className="text-brand text-center font-mono text-2xl font-medium tracking-widest">
         {formatShortCode(shortCode)}
       </p>
       <p className="text-muted text-sm">

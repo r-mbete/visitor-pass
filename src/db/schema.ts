@@ -14,6 +14,9 @@ import {
 import { ROLES } from "../lib/access/permissions";
 import { ENTRY_KINDS } from "../lib/gate/types";
 import { REFUSAL_REASONS } from "../lib/pass/token";
+import { user } from "./auth-schema";
+
+export * from "./auth-schema";
 
 const quoted = (values: readonly string[]) =>
   values.map((v) => `'${v}'`).join(", ");
@@ -50,11 +53,20 @@ export const person = pgTable(
       .references(() => estate.id),
     name: text("name").notNull(),
     phone: text("phone"),
+    /** Where sign-in codes go (ADR 2). Stored lower-case; a person without one cannot sign in. */
+    email: text("email"),
+    /** The Better Auth user, linked the first time this person signs in. */
+    userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
     role: text("role", { enum: ROLES }).notNull(),
     active: boolean("active").notNull().default(true),
     createdAt: createdAt(),
   },
-  () => [check("person_role_check", sql.raw(`role IN (${quoted(ROLES)})`))],
+  (t) => [
+    check("person_role_check", sql.raw(`role IN (${quoted(ROLES)})`)),
+    check("person_email_lower_check", sql`${t.email} = lower(${t.email})`),
+    unique("person_email_unique").on(t.email),
+    unique("person_user_unique").on(t.userId),
+  ],
 );
 
 export const residency = pgTable(

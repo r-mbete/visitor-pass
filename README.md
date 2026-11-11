@@ -6,7 +6,7 @@ A resident pre-approves a visitor and the visitor gets a short-lived signed pass
 
 ## Status
 
-Milestones 1 to 3 of 6 are done: the pass rules, permissions, schema, a demo estate, and a gate screen that checks passes and records entries. Guard sign-in and offline mode come next. See the milestones in the requirements.
+Milestones 1 to 3 of 6 are done: the pass rules, permissions, schema, a demo estate, and a gate screen that checks passes and records entries. Sign-in with an emailed code, sign-out and a profile page are also in, ahead of milestone 5. Offline mode comes next. See the milestones in the requirements.
 
 - [Requirements](docs/REQUIREMENTS.md): goals, users, stories, data model, milestones.
 - [Threat model](docs/THREAT-MODEL.md): what is protected, who it is defended against, and the accepted gaps.
@@ -33,9 +33,10 @@ Requires Node 24.21.0 (pinned in `.nvmrc`, so local and CI use the same npm). Wi
 npm install
 cp .env.example .env.local   # then fill in DATABASE_URL
 npm run keys:generate        # paste the PASS_SIGNING_KEY line into .env.local
+openssl rand -base64 32      # paste it as BETTER_AUTH_SECRET in .env.local
 npm run db:migrate
 npm run db:seed              # a demo estate, Mvule Gardens
-npm run dev                  # http://localhost:3000, then open the dashboard
+npm run dev                  # http://localhost:3000, then sign in
 ```
 
 ## Scripts
@@ -72,18 +73,29 @@ CI runs lint, format check, typecheck, tests and build on every PR and on pushes
 
 A test signs each demo pass and runs it through the real verifier, so this table stays true.
 
-In development the app has four pages, reached from a menu at the top on tablets and desktops and a tab bar at the bottom on phones:
+### Signing in
 
-- **Dashboard** (`/dashboard`): today at a glance. Check a visitor, the day's numbers, who is expected, who is inside, and recent activity.
-- **Gate** (`/gate`): the guard's screen. Type a code, see ADMIT or REFUSE with the reason, and record the entry or refusal. The browser checks the pass itself, with the estate's public key, which is how it will work offline.
-- **Passes** (`/passes`): every pass around today, with its QR code, short code and status.
-- **Log** (`/log`): every entry, exit and refusal, newest first.
+Everyone signs in at `/login` with a 6-digit code sent to their email (ADR 2). There is no password and no public sign-up: a code is only sent to an active person an admin has added. No email provider is chosen yet, so in development the code is printed in the terminal running `npm run dev`, and the sign-in page lists the demo accounts (one click fills in the email). Every demo person's email is `<first name>@mvule.example`, such as `juma@mvule.example` (guard), `grace@mvule.example` (admin) or `wanjiru@mvule.example` (resident, A1). In production, sign-in fails until a provider is set up.
 
-Until guard sign-in exists, these pages act as the demo estate's guard and are closed in production unless `DEMO_GATE=on` is set.
+Sessions are stored in Postgres and last a week from last use. Every page checks the person behind the session on each request, so deactivating someone locks them out at once.
+
+### Pages
+
+Each role sees only its own pages, following the permission table in the requirements:
+
+| Page                                                                                                 | Resident | Guard | Admin                    |
+| ---------------------------------------------------------------------------------------------------- | -------- | ----- | ------------------------ |
+| **Dashboard** (`/dashboard`): the day's numbers, the hourly chart, who is expected and who is inside |          | ✓     | ✓ (plus recent activity) |
+| **Gate** (`/gate`): type a code, see ADMIT or REFUSE with the reason, record it                      |          | ✓     |                          |
+| **Passes** (`/passes`): passes around today, with QR code, short code and status                     | own unit | ✓     | ✓                        |
+| **Log** (`/log`): entries, exits and refusals, newest first                                          | own unit |       | ✓                        |
+| **Profile** (`/profile`): your details, phone, where you are signed in, sign out                     | ✓        | ✓     | ✓                        |
+
+After signing in, a guard lands on the gate, an admin on the dashboard and a resident on their passes. The gate screen checks each pass in the browser with the estate's public key, which is how it will work offline.
 
 ## Design
 
-The palette and type follow the author's portfolio: Sand and Shell surfaces, Indigo text, Forest for admit, a deep red for refuse, Marigold for "later today", with Newsreader for headings, Inter for text and IBM Plex Mono for labels. Icons are Heroicons: outline in the menu, solid for the current page and for states. Every text colour pair is at least 6.3:1, and a status is always shown in words, never by colour alone. Layouts are built for 390 px phones, tablets and desktops, and are checked at each size with no sideways scrolling.
+The palette is Acacia teal: a deep teal sidebar, a mint-white page, white cards, a terracotta accent, and pastel mint, sky, sand and peach tiles for the day's numbers. Green means admit, red means refuse and marigold means "later today". Headings use Plus Jakarta Sans, text uses Inter and codes use IBM Plex Mono. Icons are Heroicons: outline in the menu, solid for the current page and for states. Every text colour pair is at least 4.5:1 (most are above 7:1), and a status is always shown in words, never by colour alone. In the hourly chart, refusals are also hatched so they don't depend on red against green. Desktops get a sidebar, tablets a top menu and phones a bottom tab bar. Layouts are checked at 390 px, tablet and desktop widths, with no sideways scrolling.
 
 ## Structure
 
@@ -91,11 +103,12 @@ The palette and type follow the author's portfolio: Sand and Shell surfaces, Ind
 docs/               requirements, threat model and ADRs
 drizzle/            generated SQL migrations (never edit by hand)
 src/
-  app/              pages (/, /dashboard, /gate, /passes, /log) and the gate API (/api/gate/*)
+  app/              pages (/, /login, /dashboard, /gate, /passes, /log, /profile), the gate API (/api/gate/*) and Better Auth (/api/auth/*)
   components/       shared UI: the menu, page header, pass card, gate log, status labels
   db/               Drizzle schema, client, the demo estate seed and the in-memory test database
   lib/pass/         issuing and verifying signed passes, short codes, keys
-  lib/access/       the role and permission rules
+  lib/access/       the role and permission rules, and which pages each role gets
+  lib/auth/         sign-in: Better Auth setup, linking a user to their person, profile changes
   lib/gate/         the gate check, the device bundle, and recording what a device uploads
   scripts/          one-off scripts, such as generating a signing key
 ```

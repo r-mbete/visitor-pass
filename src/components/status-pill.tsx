@@ -46,7 +46,7 @@ export function StatusPill({ status }: { status: PassStatus }) {
   const { text, className, Icon } = LOOK[status];
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-1 rounded px-2 py-1 font-mono text-xs tracking-wider whitespace-nowrap uppercase ${className}`}
+      className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 font-mono text-xs tracking-wider whitespace-nowrap uppercase ${className}`}
     >
       <Icon className="size-4" />
       {text}

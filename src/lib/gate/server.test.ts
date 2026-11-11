@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { DEMO_ESTATE_ID, seedDemoEstate } from "@/db/demo-estate";
+import { DEMO_ESTATE_ID, PEOPLE, seedDemoEstate } from "@/db/demo-estate";
 import * as schema from "@/db/schema";
 import { createTestDb, resetTestDb } from "@/db/test-db";
 import type { Db } from "@/db/types";
@@ -12,7 +12,6 @@ import {
   type ServerSigningKey,
 } from "../pass/keys";
 import { checkAtGate } from "./check";
-import { demoGuard } from "./demo";
 import { buildGateBundle, recentGateLog, recordGateEvents } from "./server";
 import type { GateEventInput } from "./types";
 
@@ -29,7 +28,13 @@ beforeAll(async () => {
 beforeEach(async () => {
   await resetTestDb(db);
   await seedDemoEstate(db, NOW);
-  guard = (await demoGuard(db))!;
+  guard = {
+    personId: PEOPLE.juma.id,
+    estateId: DEMO_ESTATE_ID,
+    role: "guard",
+    unitIds: [],
+    active: true,
+  };
 });
 
 const passId = async (code: string) =>
@@ -192,5 +197,20 @@ describe("recording gate events", () => {
       unitLabel: "A1",
       guardName: "Juma Hassan",
     });
+  });
+
+  it("shows a resident only their own unit's events", async () => {
+    const units = await db
+      .select({ id: schema.unit.id, label: schema.unit.label })
+      .from(schema.unit);
+    const b1 = units.find((u) => u.label === "B1")!.id;
+    const rows = await recentGateLog(db, DEMO_ESTATE_ID, 50, {
+      unitIds: [b1],
+    });
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.every((r) => r.unitLabel === "B1")).toBe(true);
+    expect(
+      await recentGateLog(db, DEMO_ESTATE_ID, 50, { unitIds: [] }),
+    ).toEqual([]);
   });
 });

@@ -48,10 +48,13 @@ export function GateLog({
   return (
     <>
       <ul
-        className={`divide-line border-line bg-shell divide-y rounded-lg border ${compact ? "" : "md:hidden"}`}
+        className={`divide-line divide-y ${compact ? "-my-3" : "border-line bg-shell shadow-card rounded-2xl border md:hidden"}`}
       >
         {rows.map((row) => (
-          <li key={row.id} className="flex items-start gap-3 px-4 py-3">
+          <li
+            key={row.id}
+            className={`flex items-start gap-3 py-3 ${compact ? "" : "px-4"}`}
+          >
             <span className="pt-0.5">
               <Mark row={row} />
             </span>
@@ -76,10 +79,10 @@ export function GateLog({
         ))}
       </ul>
       <div
-        className={`border-line bg-shell hidden overflow-hidden rounded-lg border ${compact ? "" : "md:block"}`}
+        className={`border-line bg-shell shadow-card hidden overflow-hidden rounded-2xl border ${compact ? "" : "md:block"}`}
       >
         <table className="w-full text-left">
-          <thead className="text-muted border-line border-b font-mono text-xs tracking-widest uppercase">
+          <thead className="text-muted border-line bg-paper/60 border-b font-mono text-xs tracking-widest uppercase">
             <tr>
               <th className="px-4 py-3 font-normal">When</th>
               <th className="px-4 py-3 font-normal">What</th>

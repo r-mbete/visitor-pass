@@ -4,11 +4,13 @@ import { WrenchScrewdriverIcon } from "@heroicons/react/24/outline";
 export function SetupNotice({ problem }: { problem: string }) {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center gap-6 px-4 py-16 sm:px-8">
-      <p className="flex items-center gap-2 font-mono text-xs tracking-widest uppercase">
+      <p className="text-accent flex items-center gap-2 font-mono text-xs font-medium tracking-widest uppercase">
         <WrenchScrewdriverIcon className="size-5" />
         Setup needed
       </p>
-      <h1 className="font-display text-3xl leading-tight italic">{problem}</h1>
+      <h1 className="font-display text-3xl leading-tight font-bold tracking-tight">
+        {problem}
+      </h1>
       <ol className="text-muted list-decimal space-y-2 pl-6 text-lg">
         <li>
           Set <code className="font-mono">DATABASE_URL</code> in{" "}

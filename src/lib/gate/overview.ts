@@ -7,6 +7,8 @@ import type { PassClaims } from "../pass/token";
 import { checkAtGate } from "./check";
 import type { GateBundle } from "./types";
 
+const HOUR = 60 * 60 * 1000;
+
 export type PassStatus =
   "admit" | "not_yet_valid" | "expired" | "cancelled" | "used_up" | "invalid";
 
@@ -51,9 +53,13 @@ export async function passOverview(
   return rows.sort((a, b) => a.pass.validFrom - b.pass.validFrom);
 }
 
+export type HourCount = { entries: number; refusals: number };
+
 export type TodaySummary = {
   entries: number;
   refusals: number;
+  /** Entries and refusals in each hour of the day, from midnight: always 24 slots. */
+  byHour: HourCount[];
   /** Visitors who came in and have not been seen leaving, newest first. */
   inside: {
     passId: string;
@@ -104,6 +110,19 @@ export async function todaySummary(
     balance.set(e.passId, row);
   }
 
+  const byHour: HourCount[] = Array.from({ length: 24 }, () => ({
+    entries: 0,
+    refusals: 0,
+  }));
+  for (const e of events) {
+    if (e.kind === "exit") continue;
+    const hour = Math.floor((e.at.getTime() - since.getTime()) / HOUR);
+    const slot = byHour[hour];
+    if (!slot) continue;
+    if (e.kind === "entry") slot.entries += 1;
+    else slot.refusals += 1;
+  }
+
   return {
     entries: events.filter((e) => e.kind === "entry").length,
     refusals: events.filter((e) => e.kind === "refusal").length,
@@ -116,5 +135,6 @@ export async function todaySummary(
         since: r.since,
       }))
       .sort((a, b) => b.since.getTime() - a.since.getTime()),
+    byHour,
   };
 }

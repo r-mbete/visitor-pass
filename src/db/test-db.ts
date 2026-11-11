@@ -14,6 +14,6 @@ export async function createTestDb(): Promise<Db> {
 
 export async function resetTestDb(db: Db): Promise<void> {
   await db.execute(
-    sql`TRUNCATE estate, unit, person, residency, pass, entry_event CASCADE`,
+    sql`TRUNCATE estate, unit, person, residency, pass, entry_event, "user", session, account, verification CASCADE`,
   );
 }

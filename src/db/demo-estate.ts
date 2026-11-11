@@ -15,17 +15,58 @@ const UNITS = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4"] as const;
 type UnitLabel = (typeof UNITS)[number];
 const unitId = (label: UnitLabel) => id(100 + UNITS.indexOf(label));
 
-const PEOPLE = {
-  admin: { id: id(200), name: "Grace Mutua", role: "admin" },
-  juma: { id: id(201), name: "Juma Hassan", role: "guard" },
-  peter: { id: id(202), name: "Peter Kiprono", role: "guard" },
-  wanjiru: { id: id(210), name: "Wanjiru Kamau", role: "resident", unit: "A1" },
-  otieno: { id: id(211), name: "Otieno Ochieng", role: "resident", unit: "A2" },
-  fatma: { id: id(212), name: "Fatma Ali", role: "resident", unit: "A3" },
-  daniel: { id: id(213), name: "Daniel Mwangi", role: "resident", unit: "B1" },
+/** Sign in as any of these on /login; in development the code is printed in the dev server's terminal. */
+export const PEOPLE = {
+  admin: {
+    id: id(200),
+    name: "Grace Mutua",
+    email: "grace@mvule.example",
+    role: "admin",
+  },
+  juma: {
+    id: id(201),
+    name: "Juma Hassan",
+    email: "juma@mvule.example",
+    role: "guard",
+  },
+  peter: {
+    id: id(202),
+    name: "Peter Kiprono",
+    email: "peter@mvule.example",
+    role: "guard",
+  },
+  wanjiru: {
+    id: id(210),
+    name: "Wanjiru Kamau",
+    email: "wanjiru@mvule.example",
+    role: "resident",
+    unit: "A1",
+  },
+  otieno: {
+    id: id(211),
+    name: "Otieno Ochieng",
+    email: "otieno@mvule.example",
+    role: "resident",
+    unit: "A2",
+  },
+  fatma: {
+    id: id(212),
+    name: "Fatma Ali",
+    email: "fatma@mvule.example",
+    role: "resident",
+    unit: "A3",
+  },
+  daniel: {
+    id: id(213),
+    name: "Daniel Mwangi",
+    email: "daniel@mvule.example",
+    role: "resident",
+    unit: "B1",
+  },
   achieng: {
     id: id(214),
     name: "Achieng Odhiambo",
+    email: "achieng@mvule.example",
     role: "resident",
     unit: "B2",
   },
@@ -33,6 +74,7 @@ const PEOPLE = {
   samuel: {
     id: id(215),
     name: "Samuel Njoroge",
+    email: "samuel@mvule.example",
     role: "resident",
     unit: "B4",
     active: false,
@@ -42,6 +84,7 @@ const PEOPLE = {
   {
     id: string;
     name: string;
+    email: string;
     role: "admin" | "guard" | "resident";
     unit?: UnitLabel;
     active?: boolean;
@@ -199,6 +242,7 @@ export async function seedDemoEstate(db: Db, now = new Date()) {
         id: p.id,
         estateId: DEMO_ESTATE_ID,
         name: p.name,
+        email: p.email,
         role: p.role,
         active: !("active" in p) || p.active,
       })),

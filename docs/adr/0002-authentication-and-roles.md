@@ -44,3 +44,8 @@ The users differ. Residents and admins use their own phones, rarely, and want a 
 - Better Auth adds its own tables (`user`, `session`, `account`, `verification`) next to ours, generated as a Drizzle migration.
 - Guards need no email address or phone of their own.
 - Device enrolment and the guard PIN are our own code, so they need their own tests.
+
+## Update, 2026-11-11
+
+Sign-in was built ahead of milestone 5. For now guards also sign in with an emailed code, on their own account, so every entry still names the guard. Gate-device enrolment and the guard PIN stay planned for the offline milestone (ADR 3). No email provider is chosen yet: in development the code is printed in the server log, and in production sending fails with an error rather than silently. Codes are 6 digits, last 10 minutes, allow 5 tries and are stored hashed. A person is linked to their Better Auth user by email on first sign-in, through `person.user_id`.
+

@@ -1,21 +1,35 @@
 @import "tailwindcss";
 
 @theme {
-  /* The portfolio palette (Sand, Shell, Indigo, Forest, Marigold) given jobs.
-     Contrast (checked): ink on paper 10.8:1, muted on paper 6.3:1, shell on admit 7.1:1, shell on refuse 6.6:1, ink on wait 7.2:1. */
-  --color-paper: #f3dfb1;
-  --color-shell: #f8efde;
-  --color-ink: #282552;
-  --color-muted: #4f4a6e;
-  --color-line: #dcc58e;
-  --color-admit: #37573a;
-  --color-refuse: #a3201b;
-  --color-wait: #f8a650;
-  --color-accent: #37573a;
+  /* Acacia teal: a deep teal frame, mint-white page, white cards, a terracotta accent and pastel tiles.
+     Contrast (checked): ink on paper 14.4:1, muted on white 7.0:1, muted on paper 6.4:1, white on brand 12.0:1,
+     brand-soft on brand 7.6:1, white on accent 5.4:1, white on admit 5.3:1, white on refuse 6.6:1, ink on wait 8.6:1,
+     ink on every tile at least 12.8:1, muted on every tile at least 5.7:1. */
+  --color-paper: #f3f6f1;
+  --color-shell: #ffffff;
+  --color-ink: #14262a;
+  --color-muted: #4a5d5f;
+  --color-line: #dce5df;
+  --color-brand: #0f3d3e;
+  --color-brand-deep: #0a2e2f;
+  --color-brand-soft: #b9d3ce;
+  --color-accent: #b4492a;
+  --color-glow: #e8a87c;
+  --color-admit: #1f7a4d;
+  --color-refuse: #b42318;
+  --color-wait: #f2b544;
 
-  --font-display: var(--font-newsreader), Georgia, serif;
+  --color-tile-mint: #ddf1e4;
+  --color-tile-peach: #fce3d6;
+  --color-tile-sky: #dcebf7;
+  --color-tile-sand: #f6ecd2;
+
+  --font-display: var(--font-jakarta), system-ui, sans-serif;
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --shadow-card:
+    0 1px 2px rgb(15 61 62 / 0.04), 0 4px 16px rgb(15 61 62 / 0.06);
 }
 
 body {
@@ -25,12 +39,12 @@ body {
 }
 
 ::selection {
-  background-color: var(--color-wait);
+  background-color: var(--color-glow);
   color: var(--color-ink);
 }
 
 :focus-visible {
-  outline: 3px solid var(--color-ink);
+  outline: 3px solid var(--color-accent);
   outline-offset: 3px;
 }
 

@@ -41,9 +41,26 @@ describe("the dashboard's numbers for the demo estate", () => {
     expect(today.inside.map((v) => v.visitorName)).toEqual(["Tom Barasa"]);
   });
 
+  it("split entries and refusals by Nairobi hour, leaving out exits", async () => {
+    const today = await todaySummary(db, DEMO_ESTATE_ID, startOfDay(NOW));
+    expect(today.byHour).toHaveLength(24);
+    const busy = Object.fromEntries(
+      today.byHour.flatMap((h, hour) =>
+        h.entries + h.refusals > 0 ? [[hour, h]] : [],
+      ),
+    );
+    // Halima at 03:30, Tom at 10:30, Mary at 11:00 and Halima refused at 11:30.
+    expect(busy).toEqual({
+      3: { entries: 1, refusals: 0 },
+      10: { entries: 1, refusals: 0 },
+      11: { entries: 1, refusals: 1 },
+    });
+  });
+
   it("ignore what happened before today", async () => {
     const tomorrow = new Date(NOW.getTime() + 24 * 60 * 60 * 1000);
     const today = await todaySummary(db, DEMO_ESTATE_ID, startOfDay(tomorrow));
-    expect(today).toEqual({ entries: 0, refusals: 0, inside: [] });
+    expect(today).toMatchObject({ entries: 0, refusals: 0, inside: [] });
+    expect(today.byHour.every((h) => h.entries + h.refusals === 0)).toBe(true);
   });
 });

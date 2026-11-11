@@ -196,12 +196,14 @@ export type LogRow = {
   deviceTime: Date;
 };
 
-/** The newest gate events for an estate. */
+/** The newest gate events for an estate, or only for some of its units (a resident's own). */
 export async function recentGateLog(
   db: Db,
   estateId: string,
   limit = 20,
+  only: { unitIds?: readonly string[] } = {},
 ): Promise<LogRow[]> {
+  if (only.unitIds?.length === 0) return [];
   return db
     .select({
       id: schema.entryEvent.id,
@@ -215,7 +217,14 @@ export async function recentGateLog(
     .from(schema.entryEvent)
     .innerJoin(schema.person, eq(schema.entryEvent.guardId, schema.person.id))
     .leftJoin(schema.unit, eq(schema.entryEvent.unitId, schema.unit.id))
-    .where(eq(schema.entryEvent.estateId, estateId))
+    .where(
+      and(
+        eq(schema.entryEvent.estateId, estateId),
+        only.unitIds
+          ? inArray(schema.entryEvent.unitId, [...only.unitIds])
+          : undefined,
+      ),
+    )
     .orderBy(desc(schema.entryEvent.deviceTime))
     .limit(limit);
 }

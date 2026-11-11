@@ -174,7 +174,7 @@ export function GateScreen({ bundle, guardName }: Props) {
           <button
             type="button"
             onClick={() => router.refresh()}
-            className="border-ink flex items-center gap-2 rounded-md border-2 px-4 py-2 font-medium"
+            className="border-brand text-brand hover:bg-shell flex items-center gap-2 rounded-lg border-2 px-4 py-2 font-medium"
           >
             <ArrowPathIcon className="size-5" />
             Update passes
@@ -201,12 +201,12 @@ export function GateScreen({ bundle, guardName }: Props) {
             spellCheck={false}
             placeholder="ABCD-2345"
             aria-describedby="code-help"
-            className="border-ink min-w-0 flex-1 rounded-md border-2 bg-white px-4 py-3 font-mono text-2xl tracking-widest uppercase"
+            className="border-line focus:border-brand bg-shell min-w-0 flex-1 rounded-xl border-2 px-4 py-3 font-mono text-2xl tracking-widest uppercase"
           />
           <button
             type="submit"
             disabled={!keys || screen.step === "saving"}
-            className="bg-ink text-shell rounded-md px-6 py-3 text-lg font-semibold disabled:opacity-50"
+            className="bg-brand text-shell rounded-xl px-6 py-3 text-lg font-semibold disabled:opacity-50"
           >
             Check
           </button>
@@ -219,7 +219,7 @@ export function GateScreen({ bundle, guardName }: Props) {
 
       <div aria-live="polite" className="min-h-48">
         {screen.step === "done" && (
-          <p className="border-admit text-admit flex items-center gap-2 rounded-md border-2 px-4 py-3 text-lg font-medium">
+          <p className="border-admit bg-tile-mint text-admit flex items-center gap-2 rounded-xl border-2 px-4 py-3 text-lg font-medium">
             <CheckCircleIcon className="size-6 shrink-0" />
             {screen.message}
           </p>
@@ -231,7 +231,7 @@ export function GateScreen({ bundle, guardName }: Props) {
               type="button"
               onClick={() => record(shown)}
               disabled={screen.step === "saving"}
-              className={`${shown.result.ok ? "bg-admit" : "bg-refuse"} text-shell flex-1 rounded-md px-6 py-4 text-lg font-semibold disabled:opacity-50`}
+              className={`${shown.result.ok ? "bg-admit" : "bg-refuse"} text-shell flex-1 rounded-xl px-6 py-4 text-lg font-semibold disabled:opacity-50`}
             >
               {screen.step === "saving"
                 ? "Saving…"
@@ -242,7 +242,7 @@ export function GateScreen({ bundle, guardName }: Props) {
             <button
               type="button"
               onClick={reset}
-              className="border-ink rounded-md border-2 px-6 py-4 text-lg font-semibold"
+              className="border-brand text-brand rounded-xl border-2 px-6 py-4 text-lg font-semibold"
             >
               Cancel
             </button>
@@ -318,12 +318,12 @@ function Panel({
   const styles = {
     admit: "border-admit",
     refuse: "border-refuse",
-    warn: "border-ink",
+    warn: "border-wait",
   }[tone];
   const heading = {
     admit: "bg-admit text-shell",
     refuse: "bg-refuse text-shell",
-    warn: "bg-ink text-shell",
+    warn: "bg-wait text-ink",
   }[tone];
   const Icon = {
     admit: CheckCircleIcon,
@@ -332,7 +332,7 @@ function Panel({
   }[tone];
   return (
     <section
-      className={`bg-shell overflow-hidden rounded-md border-4 ${styles}`}
+      className={`bg-shell shadow-card overflow-hidden rounded-2xl border-4 ${styles}`}
     >
       <h2
         className={`flex items-center gap-3 px-4 py-3 text-4xl font-bold tracking-wide uppercase ${heading}`}

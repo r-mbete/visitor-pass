@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { connection } from "next/server";
 import { SetupNotice } from "@/components/setup-notice";
-import { demoGateEnabled } from "@/lib/gate/demo";
-import { loadDemoGate } from "@/lib/gate/load";
+import { requirePage } from "@/lib/auth/session";
+import { loadGate } from "@/lib/gate/load";
 import { GateScreen } from "./gate-screen";
 
 export const metadata: Metadata = {
@@ -12,16 +10,15 @@ export const metadata: Metadata = {
 };
 
 export default async function GatePage() {
-  await connection();
-  if (!demoGateEnabled()) notFound();
-  const gate = await loadDemoGate();
+  const me = await requirePage("/gate");
+  const gate = await loadGate(me.estateId);
   if (!gate.ok) return <SetupNotice problem={gate.problem} />;
   // Keyed by build time: a refreshed bundle already counts this device's entries, so local counts start again.
   return (
     <GateScreen
       key={gate.bundle.builtAt}
       bundle={gate.bundle}
-      guardName={gate.guard.name}
+      guardName={me.name}
     />
   );
 }

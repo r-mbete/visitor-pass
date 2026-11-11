@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { connection } from "next/server";
 import { PageHeader } from "@/components/page-header";
 import { PassCard } from "@/components/pass-card";
 import { SetupNotice } from "@/components/setup-notice";
-import { demoGateEnabled } from "@/lib/gate/demo";
-import { loadDemoGate } from "@/lib/gate/load";
+import { requirePage } from "@/lib/auth/session";
+import { loadGate } from "@/lib/gate/load";
 import { passOverview } from "@/lib/gate/overview";
 
 export const metadata: Metadata = {
@@ -14,18 +12,31 @@ export const metadata: Metadata = {
 };
 
 export default async function PassesPage() {
-  await connection();
-  if (!demoGateEnabled()) notFound();
-  const gate = await loadDemoGate();
+  const me = await requirePage("/passes");
+  const gate = await loadGate(me.estateId);
   if (!gate.ok) return <SetupNotice problem={gate.problem} />;
-  const passes = await passOverview(gate.bundle);
+  const all = await passOverview(gate.bundle);
+  // Residents see only their own unit's visitors (requirements §8).
+  const passes =
+    me.role === "resident"
+      ? all.filter((p) => me.unitIds.includes(p.pass.unitId))
+      : all;
+  const resident = me.role === "resident";
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 sm:px-8 sm:py-10">
       <PageHeader
-        eyebrow={gate.bundle.estateName}
-        title="Passes"
-        description="Visitors expected around today. Type a code on the gate screen to check it."
+        eyebrow={
+          resident
+            ? `${gate.bundle.estateName} · Unit ${me.unitLabels.join(", ")}`
+            : gate.bundle.estateName
+        }
+        title={resident ? "Your visitors" : "Passes"}
+        description={
+          resident
+            ? "Passes for your unit around today. Share the QR code or the typed code with your visitor."
+            : "Visitors expected around today. Type a code on the gate screen to check it."
+        }
       />
       {passes.length === 0 ? (
         <p className="text-muted">No passes around today.</p>
